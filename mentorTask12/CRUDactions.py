@@ -73,8 +73,7 @@ async def register_account(request: Request, u_name: str = Form(...),
     u = register_user(u_name=u_name, f_name=f_name, email=email, pwd=pwd)
     token = get_access_token_register(u)
 
-    return token #RedirectResponse(url='/ui')
-
+    return token 
 
 @app.get('/register/')
 async def register_index(request: Request):
