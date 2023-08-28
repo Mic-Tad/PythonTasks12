@@ -1,17 +1,14 @@
-from starlette.middleware.sessions import SessionMiddleware
-import requests
 import mongo_actions
 from cl_currency import ClCurrency
-from fastapi import FastAPI, Request, HTTPException, status, Form, Depends
+from fastapi import FastAPI, Request, Form, Depends
 from statuses import Status
 from transaction_details import TransactionDetails
 from fastapi.templating import Jinja2Templates
 from auth import get_curr_user, get_access_token, register_user, get_access_token_register
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
 from middleware import TimingMiddleware
-from flask import Flask, redirect
-from constants import EXCEP_400_WRONG_USER
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="html_pages")
@@ -75,10 +72,8 @@ async def register_account(request: Request, u_name: str = Form(...),
                            pwd: str = Form(...)):
     u = register_user(u_name=u_name, f_name=f_name, email=email, pwd=pwd)
     token = get_access_token_register(u)
-    """request.session['access_token'] = token['access_token']
-    request.session['token_type'] = token['token_type']
-    headers = {"Authorization": f"Bearer {token['access_token']}"}"""
-    return RedirectResponse(url='/ui')
+
+    return token #RedirectResponse(url='/ui')
 
 
 @app.get('/register/')
