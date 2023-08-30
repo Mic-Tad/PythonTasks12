@@ -8,7 +8,7 @@ from auth import get_curr_user, get_access_token, register_user, get_access_toke
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
 from middleware import TimingMiddleware
-
+import requests
 
 app = FastAPI()
 templates = Jinja2Templates(directory="html_pages")
@@ -18,6 +18,7 @@ app.add_middleware(TimingMiddleware)
 
 @app.get("/")
 async def home_index(request: Request):
+
     return templates.TemplateResponse("home_index.html", {"request": request})
 
 
@@ -29,7 +30,11 @@ async def get_trans(t_id: str, current_user=Depends(get_curr_user)):
 @app.delete("/delete")
 async def delete_trans(t_id: str, current_user=Depends(get_curr_user)):
     return mongo_actions.delete_transaction(t_id, current_user.u_name)
-
+@app.delete("/delet")
+async def delete_trans( current_user=Depends(get_curr_user)):
+    print('aaa')
+    t_id='tid2001'
+    return mongo_actions.delete_transaction(t_id, current_user.u_name)
 
 @app.post("/post/transaction")
 async def add_trans(
@@ -66,23 +71,27 @@ async def update_trans(
 
 
 @app.post('/register/')
-async def register_account(request: Request, u_name: str = Form(...),
+async def register_account(u_name: str = Form(...),
                            email: str = Form(...),
                            f_name: str = Form(...),
                            pwd: str = Form(...)):
     u = register_user(u_name=u_name, f_name=f_name, email=email, pwd=pwd)
     token = get_access_token_register(u)
 
-    return token 
-
+    headers = {
+        "Authorization": f"Bearer {token['access_token']}"
+    }
+    return RedirectResponse(url='/ui', headers=headers)
+@app.post('/ui')
+async def ui_index(request: Request, current_user=Depends(get_curr_user)):
+    print(current_user.u_name)
+    return templates.TemplateResponse("ui_index.html", {"request": request})
 @app.get('/register/')
 async def register_index(request: Request):
     return templates.TemplateResponse("register_index.html", {"request": request})
 
 
-@app.post('/ui')
-async def ui_index(request: Request, current_user=Depends(get_curr_user)):
-    return templates.TemplateResponse("ui_index.html", {"request": request})
+
 
 
 @app.post('/token')
@@ -100,3 +109,5 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
+

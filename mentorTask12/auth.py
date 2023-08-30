@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from constants import *
 from mongo_actions import get_user
 from fastapi.security import OAuth2PasswordBearer
+from mongo_actions import clear_db
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
@@ -84,6 +85,15 @@ def get_access_token(from_data):
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
+"""def get_access_token_(username,pwd):
+    user = auth_user(username,pwd)
+    if not user:
+        raise EXCEP_401_INCORRECT_CREDS
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={'sub': user.u_name}, exp_delta=access_token_expires)
+    return {'access_token': access_token, 'token_type': 'bearer'}"""
+
+
 def get_access_token_register(user):
     if not user:
         raise EXCEP_401_INCORRECT_CREDS
@@ -103,4 +113,44 @@ def register_user(u_name: str,
     return u
 
 
+if __name__ == "__main__":
+    """from fastapi.testclient import TestClient
+    import pymongo
 
+    import CRUDactions
+
+    client1 = pymongo.MongoClient("localhost:27017")
+    db = client1.Market
+    coll1 = db.Transactions
+    coll2 = db.UsersTransactions
+    coll3 = db.Users
+
+    URL = 'http://127.0.0.1:8000'
+    client = TestClient(CRUDactions.app, base_url=URL)"""
+    import requests
+
+    api_endpoint = "http://127.0.0.1:8000/ui"
+
+    u = User(u_name='q', f_name='q', email='q', hash_pass=pwd_context.hash('q'))
+    token = get_access_token_register(u)
+
+    headers = {
+        "Authorization": f"Bearer {token['access_token']}"
+    }
+
+    response = requests.post(api_endpoint, headers=headers)
+
+    if response.status_code == 200:
+        print("Request successful")
+        print(response.json())
+    else:
+        print("Request failed")
+        print(response.json())
+    """u = User(u_name='q', f_name='q', email='q', hash_pass=pwd_context.hash('q'))
+    token = get_access_token_register(u)
+
+    headers = {
+        "Authorization": f"Bearer {token['access_token']}"
+    }
+    response = client.delete('/delet', headers=headers)
+    print(response)"""
